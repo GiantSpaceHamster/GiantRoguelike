@@ -35,10 +35,12 @@ class ProgramInformation(SingletonPattern):
     def GetDefalutPrefix(self):
         return self.m_defPrefix
 
+
 # 리소스 매니져
 class ResourceManager(SingletonPattern):
     m_ableExtList = ( "png", "jpg", "bmp" )
     m_resourceMap = {}
+    m_loadedResourceMap = {}
 
     def __init__(self):
         self.Initialize()
@@ -77,6 +79,20 @@ class ResourceManager(SingletonPattern):
         else:
             print("Warning: ResourceManager doesn't have resource - Tag : " + tag)
 
+    def LoadAndReflushImage(self, loader):
+        for path, filename in self.m_resourceMap.items():
+            self.m_loadedResourceMap[path] = loader(path + filename[-4:])
+                                        
+
+    def GetLoadedResource(self, tag):
+        if tag is None:
+            return None
+        
+        if "Resource/" + ProgramInformation.Get().GetDefalutPrefix() + "/" + tag in self.m_loadedResourceMap:
+            return self.m_loadedResourceMap["Resource/" + ProgramInformation.Get().GetDefalutPrefix() + "/" + tag]
+
+        return None
+
 
 # 맵 생성 함수
 def GenerateMap(x, y, mapData):
@@ -100,10 +116,16 @@ def GenerateMap(x, y, mapData):
     for i in range(x):
         mapData[0][i][0] = Wall()
         mapData[0][i][y - 1] = Wall()
+        
+        mapData[0][i][0].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
+        mapData[0][i][y - 1].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
 
-    for j in range(y):
+    for i in range(y):
         mapData[0][0][i] = Wall()
         mapData[0][x - 1][i] = Wall()
+        
+        mapData[0][0][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
+        mapData[0][x - 1][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
 
 # 맵 검사 함수
 def CheckValidMap(mapData, x, y, r, w):

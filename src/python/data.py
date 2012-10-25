@@ -15,6 +15,7 @@ from utils import *
 # 5. 이때, 각 오브젝트들은 자신의 위치를 안다.
 player = PlayerCharacter()
 player.SetPosition(2, 2)
+player.SetProperty("ResourceID", "Image/BlockObject/PlayableCharacter/Character/warrior")
 
 """
 fieldMap = [

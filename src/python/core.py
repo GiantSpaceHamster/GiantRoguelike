@@ -41,6 +41,21 @@ class Moveable():
 
 # 기본 Object 클레스
 class Object(Interactable, DummyDrawable, CanMoveable):
+    # 프로퍼티 리스트를 가집니다. 알려진 프로퍼티 리스트는 Property.txt를 참조 하세요.
+    m_propertyList = {}
+
+    def __init__(self):
+        self.m_propertyList = {}
+
+    def SetProperty(self, propertyName, propertyValue):
+        self.m_propertyList[propertyName] = propertyValue
+
+    def GetProperty(self, propertyName):
+        if propertyName in self.m_propertyList:
+            return self.m_propertyList[propertyName]
+        
+        return None
+
     pass
 
 # 기본 2단 레이어 구성.
