@@ -136,3 +136,32 @@ def CheckValidMap(mapData, x, y, r, w):
         return False
 
     return mapData[2][x][y].CanMoveThis() and mapData[0][x][y].CanMoveThis()
+
+# 캐릭터 이동 함수
+def MoveCharacter(char, mapData, row, col, userCommand):
+    destX = char.GetX()
+    destY = char.GetY()
+
+    if userCommand == "LEFT":
+        destX = destX - 1
+
+    if userCommand == "RIGHT":
+        destX = destX + 1
+
+    if userCommand == "UP":
+        destY = destY - 1
+
+    if userCommand == "DOWN":
+        destY = destY + 1
+
+    # 해당 위치의 사물과 상호 작용 가능한지 확인
+    if mapData[0][destX][destY].IsInteractable() is True:
+        mapData[0][destX][destY].Interaction()
+    
+    # 위치가 옮겨지는지 확인하고
+    if CheckValidMap(mapData, destX, destY, row, col) is False:
+        print("Can't move!")
+    else:
+        mapData[0][char.GetX()][char.GetY()] = Object()
+        char.SetPosition(destX, destY)
+        mapData[0][destX][destY] = char

@@ -16,7 +16,9 @@ from utils import *
 player = PlayerCharacter()
 player.SetPosition(2, 2)
 player.SetProperty("ResourceID", "Image/BlockObject/PlayableCharacter/Character/warrior")
-
+enemy = EnemyCharacter()
+enemy.SetPosition(5, 5)
+enemy.SetProperty("ResourceID", "Image/BlockObject/PlayableCharacter/Monster/Slime")
 """
 fieldMap = [
         [
@@ -52,4 +54,4 @@ fieldMap = [[], [], []]
 GenerateMap(row, col, fieldMap)            
 
 fieldMap[0][player.GetX()][player.GetY()] = player
-fieldMap[0][4][4] = EnemyCharacter()
+fieldMap[0][enemy.GetX()][enemy.GetY()] = enemy

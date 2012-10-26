@@ -39,29 +39,13 @@ while 1:
     if not userCommand in MovingCommand:
         continue
 
-    destX = player.GetX()
-    destY = player.GetY()
-
     if userCommand == 'w':
-        destX = destX - 1
-
+        userCommand = "UP"
     if userCommand == 's':
-        destX = destX + 1
-
+        userCommand = "DOWN"
     if userCommand == 'a':
-        destY = destY - 1
-
+        userCommand = "LEFT"
     if userCommand == 'd':
-        destY = destY + 1
+        userCommand = "RIGHT"
 
-    # 해당 위치의 사물과 상호 작용 가능한지 확인
-    if fieldMap[0][destX][destY].IsInteractable() is True:
-        fieldMap[0][destX][destY].Interaction()
-    
-    # 위치가 옮겨지는지 확인하고
-    if CheckValidMap(fieldMap, destX, destY, row, col) is False:
-        print("Can't move!")
-    else:
-        fieldMap[0][player.GetX()][player.GetY()] = Object()
-        player.SetPosition(destX, destY)
-        fieldMap[0][destX][destY] = player
+    MoveCharacter(player, fieldMap, row, col, userCommand)
