@@ -57,10 +57,10 @@ while True:
          for y in range(col):
             image = ResourceManager.Get().GetLoadedResource(fieldMap[i][x][y].GetProperty("ResourceID"))
             if image is not None:
-               screen.blit(image, (x * 50, y * 50))
+               screen.blit(image, (x * 48, y * 48))
 
    #playerImg = ResourceManager.Get().GetLoadedResource(player.GetProperty("ResourceID"))
    #if playerImg is not None:
-    #  screen.blit(playerImg, (player.GetX() * 50, player.GetY() * 50))
+    #  screen.blit(playerImg, (player.GetX() * 48, player.GetY() * 48))
 
    pygame.display.flip()
