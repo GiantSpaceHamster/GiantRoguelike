@@ -180,3 +180,41 @@ class EnemyCharacter(PlayableCharacter):
 
     def Draw(self):
         print("E", end='')
+
+# Graph 알고리즘을 위한 데이터 클레스
+# 노드 클레스
+class Node:
+    m_index = 0
+
+    def __init__(self, index):
+        self.m_index = index
+
+# 엣지 클레
+class Edge:
+    m_source = -1
+    m_destiny = -1
+
+    def __init__(self):
+        self.m_source = -1
+        self.m_destiny = -1
+
+# 그래프 클레스, 가중치가 없는 기본적인 노드와 엣지 리스트를 가진다.
+class Graph:
+    m_node = None
+    m_edgeList = []
+
+    def __init__(self):
+        self.m_node = None
+        self.m_edgeList = []
+
+    def AddNode(self, node):
+        self.m_node = node
+
+    def AddEdge(self, edge):
+        self.m_edgeList.append( edge )
+
+    def PrintEdge(self):
+        print(self.m_node.m_index + 1, "Node's Edge List --- ")
+        for i in self.m_edgeList:
+            print(i.m_destiny)
+        print("")

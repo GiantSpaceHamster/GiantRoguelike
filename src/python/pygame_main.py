@@ -13,6 +13,9 @@ window = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Roguelike")
 screen = pygame.display.get_surface()
 
+# 명령 리스트
+orderList = []
+
 # ResourceManager의 파일들을 갱신해 두자.
 ResourceManager.Get().LoadAndReflushImage(pygame.image.load)
  
@@ -38,6 +41,11 @@ def KeyInput(events):
             elif event.key == pygame.K_DOWN:
                """ 아래로 이동 """
                MoveCharacter(player, fieldMap, row, col, "DOWN")
+
+            elif event.key == pygame.K_SPACE:
+               """ 랜덤으로 이동 """
+               global orderList
+               orderList = PathFindAndMove(player, fieldMap, 5, 5)
             
 while True:
    # 가장 먼저 플레이어가 행동 하고,
@@ -58,6 +66,31 @@ while True:
             image = ResourceManager.Get().GetLoadedResource(fieldMap[i][x][y].GetProperty("ResourceID"))
             if image is not None:
                screen.blit(image, (x * 48, y * 48))
+
+   if len(orderList) > 0:
+      print("Order Size : ", len(orderList))
+      order = orderList[0]
+      orderList.remove(order)
+      playerPos = player.GetY() * 10 + player.GetX()
+
+      if playerPos > order:
+         # playerPos 가 order 보다 크다.
+         if playerPos - 10 == order:
+            print("Do Down!")
+            MoveCharacter(player, fieldMap, row, col, "UP")
+         elif playerPos - 1 == order:
+            print("Do Right!")
+            MoveCharacter(player, fieldMap, row, col, "LEFT")
+      else:
+         # playerPos 가 order 보다 작다.
+         if playerPos + 10 == order:
+            print("Do Up!")
+            MoveCharacter(player, fieldMap, row, col, "DOWN")
+         elif playerPos + 1 == order:
+            print("Do Left!")
+            MoveCharacter(player, fieldMap, row, col, "RIGHT")
+         
+      
 
    #playerImg = ResourceManager.Get().GetLoadedResource(player.GetProperty("ResourceID"))
    #if playerImg is not None:

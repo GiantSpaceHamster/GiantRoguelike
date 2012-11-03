@@ -38,6 +38,8 @@ class ProgramInformation(SingletonPattern):
 
 # 리소스 매니져
 class ResourceManager(SingletonPattern):
+    """ 싱글톤으로 구현된 리소스 매니져 입니다. """
+    
     m_ableExtList = ( "png", "jpg", "bmp" )
     m_resourceMap = {}
     m_loadedResourceMap = {}
@@ -46,6 +48,7 @@ class ResourceManager(SingletonPattern):
         self.Initialize()
     
     def Initialize(self):
+        """ 리소스 매니져를 초기화 합니다. """
         # 가능하다면, 초기화 시 모든 리소스를 로드 하게 한다.
         # 가능하다면, 리소스 매니져는 쓰레드로 빼자.(PC 기준)
         self.__LoadAllResource()
@@ -74,17 +77,20 @@ class ResourceManager(SingletonPattern):
         pass
 
     def GetResource(self, tag):
+        """ tag 를 이용하여 해당 리소스를 얻어 냅니다. """
         if "Resource/" + ProgramInformation.Get().GetDefalutPrefix() + "/" + tag in self.m_resourceMap:
             print("Has!")
         else:
             print("Warning: ResourceManager doesn't have resource - Tag : " + tag)
 
     def LoadAndReflushImage(self, loader):
+        """ loader를 이용하여 리소스를 실제로 로드 합니다. loader는 환경에 맞게 구성된 로더 데이터여야 합니다. """
         for path, filename in self.m_resourceMap.items():
             self.m_loadedResourceMap[path] = loader(path + filename[-4:])
                                         
 
     def GetLoadedResource(self, tag):
+        """ 실제로 로드된 tag 데이터를 불러 옵니다. """
         if tag is None:
             return None
         
@@ -95,11 +101,23 @@ class ResourceManager(SingletonPattern):
 
 
 # 맵 생성 함수
-def GenerateMap(x, y, mapData):
-    mapData[0] = list(range(x))
-    mapData[1] = list(range(x))
-    mapData[2] = list(range(x))
-        
+def GenerateMap(x, y):
+    """ x, y 로 구성된 맵을 생성 합니다. """
+
+    # Path Finding을 위해, x * y 크기의 노드를 만듭니다.
+    mapNode = CreateNodeList(x * y)
+
+    # 만들어진 mapNode 데이터를 토대로, 4방향 격자 그래프를 만듭니다.
+    mapGraph = CreateQuadGridGraph(x, y, mapNode)
+
+    # 맵 데이터를 생성 합니다.
+    mapData = []
+
+    mapData.append(list(range(x)))
+    mapData.append(list(range(x)))
+    mapData.append(list(range(x)))
+    mapData.append(mapGraph)
+
     for i in range(x):
         mapData[0][i] = list(range(y))
         mapData[1][i] = list(range(y))
@@ -126,6 +144,8 @@ def GenerateMap(x, y, mapData):
         
         mapData[0][0][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
         mapData[0][x - 1][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
+
+    return mapData
 
 # 맵 검사 함수
 def CheckValidMap(mapData, x, y, r, w):
@@ -165,3 +185,113 @@ def MoveCharacter(char, mapData, row, col, userCommand):
         mapData[0][char.GetX()][char.GetY()] = Object()
         char.SetPosition(destX, destY)
         mapData[0][destX][destY] = char
+
+# 노드를 만드는 함수
+def CreateNodeList(value):
+    """ 필요한 양 만큼의 Node를 만들어 반환 합니다. """
+    return [Node(i) for i in range(value)]
+
+# 4각형 그리드의 그래프를 만드는 함
+def CreateQuadGridGraph(width, height, nodeData):
+    graphList = []
+    
+    for i in range(len(nodeData)):
+        graph = Graph()
+        graph.AddNode(nodeData[i])
+
+        graphList.append(graph)
+
+    for i in range(width):
+        for j in range(height):
+            for count in range(4):
+                edge = Edge()
+                edge.m_source = i * width + j
+
+                # 왼쪽
+                if count == 0:
+                    if i > 0:
+                        edge.m_destiny = (i - 1) * width + j
+                    else:
+                        continue
+                
+                # 위
+                if count == 1:
+                    if j > 0:
+                        edge.m_destiny = i * width + j - 1
+                    else:
+                        continue
+                
+                # 오른쪽
+                if count == 2:
+                    if i < width - 1:
+                        edge.m_destiny = (i + 1) * width + j
+                    else:
+                        continue
+                    
+                # 아래
+                if count == 3:
+                    if j < height - 1:
+                        edge.m_destiny = i * width + j + 1
+                    else:
+                        continue
+
+                graphList[i * width + j].AddEdge(edge)
+
+    return graphList
+
+# DFS로 패스를 찾는 함수.
+def PathFindForDFS(src, dst, graph):
+    routeNode = [-1 for i in range(len(graph))]
+    visitedNode = [False for i in range(len(graph))]
+    
+    tempEdge = Edge()
+    tempEdge.m_source = src
+    tempEdge.m_destiny = src
+
+    edgeNodeList = [tempEdge]
+    edgeStack = []
+
+    while len(edgeNodeList):
+        nextEdge = edgeNodeList.pop()
+        routeNode[nextEdge.m_destiny] = nextEdge.m_source
+
+        if nextEdge.m_destiny == dst:
+            break
+
+        canFindRoute = False
+
+        # 모든 엣지를 스택에 임시로 저장
+        for i in graph[nextEdge.m_destiny].m_edgeList:
+            if visitedNode[i.m_destiny] == False:
+                # 해당 엣지로 이동한다.
+                edgeNodeList.append(i)
+                visitedNode[i.m_destiny] = True
+
+                # 루트를 찾았다!
+                canFindRoute = True
+                # 그리곤 for 루프를 빠져 나간다.
+                break
+
+        if canFindRoute is False:
+            # 루트를 찾지 못했다면, Backtrace를 한다.
+            tempEdge = Edge()
+            tempEdge.m_source = nextEdge.m_source
+            tempEdge.m_destiny = nextEdge.m_source
+
+            edgeNodeList.append(tempEdge)
+
+    findedNode = []
+    findedDst = dst
+    while True:
+        findedNode.insert(0, findedDst)
+
+        if findedDst == src:
+            break
+
+        findedDst = routeNode[findedDst]
+        
+    return findedNode
+
+# DFS로 패스를 찾고, 해당 패스로 이동 명령을 내리는 함수
+def PathFindAndMove(obj, mapData, x, y):
+    return PathFindForDFS(obj.GetY() * 10 + obj.GetX(), y * 10 + x, mapData[3])
