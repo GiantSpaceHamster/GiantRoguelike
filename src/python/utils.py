@@ -1,3 +1,4 @@
+
 # Resource를 관리할 ResourceManager
 # Python으로 구현한 싱글톤.
 # Get() 메소드는 ResourceManager를 호출하고, ResourceManager는 호출시 자신의
@@ -131,6 +132,7 @@ def GenerateMap(x, y):
     """
     외곽에 벽을 설치한다.
     """
+
     for i in range(x):
         mapData[0][i][0] = Wall()
         mapData[0][i][y - 1] = Wall()
@@ -144,6 +146,10 @@ def GenerateMap(x, y):
         
         mapData[0][0][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
         mapData[0][x - 1][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
+
+    """
+    TODO: 위 벽들을 기준으로, 각 그래프의 리스트들의 Edge도 재 조정해야 한다.
+    """
 
     return mapData
 
@@ -240,7 +246,7 @@ def CreateQuadGridGraph(width, height, nodeData):
     return graphList
 
 # DFS로 패스를 찾는 함수.
-def PathFindForDFS(src, dst, graph):
+def PathFindForDFS(src, dst, graph):    
     routeNode = [-1 for i in range(len(graph))]
     visitedNode = [False for i in range(len(graph))]
     
@@ -249,7 +255,7 @@ def PathFindForDFS(src, dst, graph):
     tempEdge.m_destiny = src
 
     edgeNodeList = [tempEdge]
-    edgeStack = []
+    #edgeStack = []
 
     while len(edgeNodeList):
         nextEdge = edgeNodeList.pop()
@@ -275,10 +281,11 @@ def PathFindForDFS(src, dst, graph):
         if canFindRoute is False:
             # 루트를 찾지 못했다면, Backtrace를 한다.
             tempEdge = Edge()
-            tempEdge.m_source = nextEdge.m_source
-            tempEdge.m_destiny = nextEdge.m_source
+            tempEdge.m_source = routeNode[nextEdge.m_source]
+            tempEdge.m_destiny = routeNode[nextEdge.m_destiny]
 
             edgeNodeList.append(tempEdge)
+                
 
     findedNode = []
     findedDst = dst
@@ -289,7 +296,7 @@ def PathFindForDFS(src, dst, graph):
             break
 
         findedDst = routeNode[findedDst]
-        
+    
     return findedNode
 
 # DFS로 패스를 찾고, 해당 패스로 이동 명령을 내리는 함수

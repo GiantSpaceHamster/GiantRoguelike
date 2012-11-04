@@ -35,7 +35,7 @@ def KeyInput(events):
             elif event.key == pygame.K_SPACE:
                """ 랜덤으로 이동 """
                global orderList
-               orderList = PathFindAndMove(player, fieldMap, 5, 5)
+               orderList = PathFindAndMove(player, fieldMap, 4, 4)
             
 
 def main():
@@ -72,7 +72,7 @@ def main():
                   screen.blit(image, (x * 48, y * 48))
 
       if len(orderList) > 0:
-         print("Order Size : ", len(orderList))
+         #print("Order Size : ", len(orderList))
          order = orderList[0]
          orderList.remove(order)
          playerPos = player.GetY() * 10 + player.GetX()
@@ -80,18 +80,14 @@ def main():
          if playerPos > order:
             # playerPos 가 order 보다 크다.
             if playerPos - 10 == order:
-               print("Do Down!")
                MoveCharacter(player, fieldMap, row, col, "UP")
             elif playerPos - 1 == order:
-               print("Do Right!")
                MoveCharacter(player, fieldMap, row, col, "LEFT")
          else:
             # playerPos 가 order 보다 작다.
             if playerPos + 10 == order:
-               print("Do Up!")
                MoveCharacter(player, fieldMap, row, col, "DOWN")
             elif playerPos + 1 == order:
-               print("Do Left!")
                MoveCharacter(player, fieldMap, row, col, "RIGHT")
             
          
