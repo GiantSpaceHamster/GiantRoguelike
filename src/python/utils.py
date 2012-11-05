@@ -246,7 +246,9 @@ def CreateQuadGridGraph(width, height, nodeData):
     return graphList
 
 # DFS로 패스를 찾는 함수.
-def PathFindForDFS(src, dst, graph):    
+def PathFindForDFS(src, dst, graph):
+    """ 코드의 일부는 Programming Game AI by Example(Mat Buckland/사이텍 미디어) 을 참고 했습니다. """
+    findPath = False
     routeNode = [-1 for i in range(len(graph))]
     visitedNode = [False for i in range(len(graph))]
     
@@ -254,51 +256,84 @@ def PathFindForDFS(src, dst, graph):
     tempEdge.m_source = src
     tempEdge.m_destiny = src
 
-    edgeNodeList = [tempEdge]
-    #edgeStack = []
+    edgeNodeStack = [tempEdge]
 
-    while len(edgeNodeList):
-        nextEdge = edgeNodeList.pop()
+    while len(edgeNodeStack):
+        nextEdge = edgeNodeStack.pop()
         routeNode[nextEdge.m_destiny] = nextEdge.m_source
 
-        if nextEdge.m_destiny == dst:
-            break
+        visitedNode[nextEdge.m_destiny] = True
 
-        canFindRoute = False
+        if nextEdge.m_destiny == dst:
+            findPath = True
+            break
 
         # 모든 엣지를 스택에 임시로 저장
         for i in graph[nextEdge.m_destiny].m_edgeList:
             if visitedNode[i.m_destiny] == False:
-                # 해당 엣지로 이동한다.
-                edgeNodeList.append(i)
-                visitedNode[i.m_destiny] = True
-
-                # 루트를 찾았다!
-                canFindRoute = True
-                # 그리곤 for 루프를 빠져 나간다.
-                break
-
-        if canFindRoute is False:
-            # 루트를 찾지 못했다면, Backtrace를 한다.
-            tempEdge = Edge()
-            tempEdge.m_source = routeNode[nextEdge.m_source]
-            tempEdge.m_destiny = routeNode[nextEdge.m_destiny]
-
-            edgeNodeList.append(tempEdge)
-                
+                # 해당 엣지를 스택에 넣는다.
+                edgeNodeStack.append(i)
 
     findedNode = []
-    findedDst = dst
-    while True:
-        findedNode.insert(0, findedDst)
 
-        if findedDst == src:
-            break
+    if findPath is True:
+        findedDst = dst
+        while True:
+            findedNode.insert(0, findedDst)
 
-        findedDst = routeNode[findedDst]
-    
+            if findedDst == src:
+                break
+
+            findedDst = routeNode[findedDst]
+
     return findedNode
 
-# DFS로 패스를 찾고, 해당 패스로 이동 명령을 내리는 함수
+# BFS로 패스를 찾는 함수.
+def PathFindForBFS(src, dst, graph):
+    """ 코드의 일부는 Programming Game AI by Example(Mat Buckland/사이텍 미디어) 을 참고 했습니다. """
+    findPath = False
+    routeNode = [-1 for i in range(len(graph))]
+    visitedNode = [False for i in range(len(graph))]
+    
+    tempEdge = Edge()
+    tempEdge.m_source = src
+    tempEdge.m_destiny = src
+
+    edgeNodeStack = [tempEdge]
+
+    while len(edgeNodeStack):
+        nextEdge = edgeNodeStack[0]
+        edgeNodeStack.remove(nextEdge)
+
+        routeNode[nextEdge.m_destiny] = nextEdge.m_source
+
+        visitedNode[nextEdge.m_destiny] = True
+
+        if nextEdge.m_destiny == dst:
+            findPath = True
+            break
+
+        # 모든 엣지를 스택에 임시로 저장
+        for i in graph[nextEdge.m_destiny].m_edgeList:
+            if visitedNode[i.m_destiny] == False:
+                # 해당 엣지를 스택에 넣는다.
+                edgeNodeStack.append(i)
+                visitedNode[i.m_destiny] = True
+
+    findedNode = []
+
+    if findPath is True:
+        findedDst = dst
+        while True:
+            findedNode.insert(0, findedDst)
+
+            if findedDst == src:
+                break
+
+            findedDst = routeNode[findedDst]
+
+    return findedNode
+
+# BFS로 패스를 찾고, 해당 패스로 이동 명령을 내리는 함수
 def PathFindAndMove(obj, mapData, x, y):
-    return PathFindForDFS(obj.GetY() * 10 + obj.GetX(), y * 10 + x, mapData[3])
+    return PathFindForBFS(obj.GetY() * 10 + obj.GetX(), y * 10 + x, mapData[3])

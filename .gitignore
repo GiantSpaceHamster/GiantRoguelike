@@ -30,3 +30,6 @@ pip-log.txt
 src/python/.idlerc
 Thumbs.db
 *~
+
+#Vim swap file
+.*.swp

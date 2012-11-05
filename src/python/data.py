@@ -52,5 +52,9 @@ col = 10
 
 fieldMap = GenerateMap(row, col)
 
+orderList = { "Move" : MoveCharacter }
+
+player.SetOrder( orderList )
+
 fieldMap[0][player.GetX()][player.GetY()] = player
 fieldMap[0][enemy.GetX()][enemy.GetY()] = enemy

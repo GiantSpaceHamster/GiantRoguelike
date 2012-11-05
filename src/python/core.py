@@ -1,23 +1,29 @@
-# Interactable 인터페이스
-class Interactable():
+class Interactable:
+    """ Interactable 인터페이스 """
     def IsInteractable(self):
         return False
 
     def Interaction(self):
         pass
 
-# Block 여부를 파악 하는 인터페이스
-class CanMoveable():
+class CanMoveable:
+    """ Block 여부를 파악 하는 인터페이스 """
     def CanMoveThis(self):
         return True
 
-# 더미로 만들 수 있는 그릴 수 있는 오브젝트
-class DummyDrawable():
+class DummyDrawable:
+    """ 더미로 만들 수 있는 그릴 수 있는 오브젝트 """
     def Draw(self):
         pass
 
-# 캐릭터를 조작할 수 있는 경우는 Moveable 인터페이스를 상속 받는다.
-class Moveable():
+class Moveable:
+    """ 캐릭터를 조작할 수 있는 경우는 Moveable 인터페이스를 상속 받는다. """
+    def SetOrder(self, orderList):
+        pass
+
+    def DoOrder(self):
+        pass
+
     def SetPosition(self, x, y):
         pass
 
@@ -39,9 +45,9 @@ class Moveable():
     def MoveRight(self):
         pass
 
-# 기본 Object 클레스
 class Object(Interactable, DummyDrawable, CanMoveable):
-    # 프로퍼티 리스트를 가집니다. 알려진 프로퍼티 리스트는 Property.txt를 참조 하세요.
+    """ 기본 Object 클레스 """
+    """ 프로퍼티 리스트를 가집니다. 알려진 프로퍼티 리스트는 Property.txt를 참조 하세요. """
     m_propertyList = {}
 
     def __init__(self):
@@ -63,72 +69,121 @@ class Object(Interactable, DummyDrawable, CanMoveable):
 # 아이템 등을 표시하는 중간 레이어. - 아이템 오브젝트
 # 바닥 등을 표시하는 바닥 레이어. - 필드 오브젝트
 
-# 기본 Object를 상속받은 FieldObject
 class FieldObject(Object):
+    """ 기본 Object를 상속받은 FieldObject """
+    def __init__(self):
+        super().__init__()
+
     def IsInteractable(self):
         return True
     
     pass
 
-# FieldObject 를 상속 받아 만든 Board
 class Board(FieldObject):
+    """ FieldObject 를 상속 받아 만든 Board """
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 보드다!")
 
     def Draw(self):
         print(" ", end='')
 
-# 기본 Object를 상속받은 ItemObject 객체
 class ItemObject(Object):
+    """ 기본 Object를 상속받은 ItemObject 객체 """
+    def __init__(self):
+        super().__init__()
+
     def IsInteractable(self):
         return True
 
     pass
 
-# 기본 Object를 상속받은 BlockObject 객체
 class BlockObject(Object):
+    """ 기본 Object를 상속받은 BlockObject 객체 """
+    def __init__(self):
+        super().__init__()
+
     def IsInteractable(self):
         return True
 
     def CanMoveThis(self):
         return False
 
-# BlockObject를 상속 받아 만든 Wall
 class Wall(BlockObject):
+    """ BlockObject를 상속 받아 만든 Wall """
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 벽이다!")
 
     def Draw(self):
         print("Q", end='')
 
-# Wall 를 상속 받아 만든 BreakableWall
 class BreakableWall(Wall):
+    """ Wall 를 상속 받아 만든 BreakableWall """
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 부서지는 벽이다!")
 
     def Draw(self):
         print("w", end='')
 
-# Wall 를 상속 받아 만든 BreakdisableWall
 class BreakdisableWall(Wall):
+    """ Wall 를 상속 받아 만든 BreakdisableWall """
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 부서지지 않 벽이다!")
 
     def Draw(self):
         print("W", end='')
 
-# BlockObject 를 상속 받아 만든 Door
-class Door(BlockObject):    
+class Door(BlockObject):
+    """ BlockObject 를 상속 받아 만든 Door """    
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 문이다!")
 
     def Draw(self):
         print("D", end='')
 
-# CharacterObject를 상속 받아 만든 PlayableCharacter - Moveable이 추가로 상속 됨.
 class PlayableCharacter(BlockObject, Moveable):
+    """ CharacterObject를 상속 받아 만든 PlayableCharacter - Moveable이 추가로 상속 됨. """
     m_x = 0
     m_y = 0
+
+    m_isSettedOrderCommand = False
+    m_orderCommandList = {}
+    m_orderList = []
+
+    def __init__(self):
+        super().__init__()
+
+        self.m_x = 0
+        self.m_y = 0
+
+        self.m_isSettedOrderCommand = False
+        self.m_orderCommandList = {}
+        self.m_orderList = []
+
+    def SetOrder(self, orderList):
+        self.m_orderList = orderList
+
+    def DoOrder(self):
+        if len(self.m_orderList) > 0:
+            order = self.m_orderList.get(0)
+            self.m_orderList.remove(order)
+
+            if m_isSettedOrderCommand == True:
+                m_orderCommandList[order]()
 
     def SetPosition(self, x, y):
         self.m_x = x
@@ -139,10 +194,12 @@ class PlayableCharacter(BlockObject, Moveable):
 
     def GetY(self):
         return self.m_y
-    pass
 
-# PlayableCharacter를 상속 받아 만든 PlayerCharacter
 class PlayerCharacter(PlayableCharacter):
+    """ PlayableCharacter를 상속 받아 만든 PlayerCharacter """
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 캐릭터이다!")
 
@@ -165,32 +222,38 @@ class PlayerCharacter(PlayableCharacter):
         print("will move right!")
         pass
 
-# PlayableCharacter를 상속 받아 만든 NonPlayerCharacter
 class NonPlayerCharacter(PlayableCharacter):
+    """ PlayableCharacter를 상속 받아 만든 NonPlayerCharacter """
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 NPC다!")
         
     def Draw(self):
         print("N", end='')
 
-# PlayableCharacter를 상속 받아 만든 EnemyCharacter
 class EnemyCharacter(PlayableCharacter):
+    """ PlayableCharacter를 상속 받아 만든 EnemyCharacter """
+    def __init__(self):
+        super().__init__()
+
     def Interaction(self):
         print("나는 적이다!")
 
     def Draw(self):
         print("E", end='')
 
-# Graph 알고리즘을 위한 데이터 클레스
-# 노드 클레스
 class Node:
+    """ Graph 알고리즘을 위한 데이터 클레스 """
+    """ 노드 클레스 """
     m_index = 0
 
     def __init__(self, index):
         self.m_index = index
 
-# 엣지 클레
 class Edge:
+    """ 엣지 클레 """
     m_source = -1
     m_destiny = -1
 
@@ -198,8 +261,8 @@ class Edge:
         self.m_source = -1
         self.m_destiny = -1
 
-# 그래프 클레스, 가중치가 없는 기본적인 노드와 엣지 리스트를 가진다.
 class Graph:
+    """ 그래프 클레스, 가중치가 없는 기본적인 노드와 엣지 리스트를 가진다. """
     m_node = None
     m_edgeList = []
 
