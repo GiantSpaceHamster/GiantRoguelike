@@ -1,4 +1,3 @@
-
 # Resource를 관리할 ResourceManager
 # Python으로 구현한 싱글톤.
 # Get() 메소드는 ResourceManager를 호출하고, ResourceManager는 호출시 자신의
