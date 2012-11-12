@@ -27,7 +27,6 @@ def main():
         direction = 0
         for pos in data.m_directionData:
             if pos is not None:
-                
                 break
                 
             direction = direction + 1
