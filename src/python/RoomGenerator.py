@@ -253,7 +253,6 @@ def MapGenerator(maxRoomNum):
         selectedRoom = otherRoom
     
     finishWorkedRoom.append(selectedRoom)
-    finishWorkedRoom.append(endRoom)
     
     # 이제 공식적으로 맵은 완성.
     # 이제 잔잔한 방들을 추가하여 좀 더 보기 좋게 꾸미자.
