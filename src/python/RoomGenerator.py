@@ -8,90 +8,186 @@ class MapData:
     m_row = 1
     m_col = 1
     
-    m_mapData = [ [0] ]
+    m_upSize = 0
+    m_downSize = 0
+    m_leftSize = 0
+    m_rightSize = 0
+    
+    m_mapData = { 0 : { 0 : None } }
     
     def __init__(self):
-        self.m_mapData = [ [ 0 ] ]
+        self.m_mapData = { 0 : { 0 : 0 } }
+        
+        self.m_upSize = 0
+        self.m_downSize = 0
+        self.m_leftSize = 0
+        self.m_rightSize = 0
+
+    def __call__(self):
+        print("Data : ",  self.m_mapData)
+        
+    def __getitem__(self,  index):
+        return self.m_mapData[index]
+
+    def PrintMap(self):
+        x = self.m_leftSize
+        y = self.m_upSize
+
+        for j in range(self.m_upSize, self.m_downSize - 1, -1):
+            for i in range(self.m_leftSize, self.m_rightSize + 1):
+                print(self.m_mapData[i][j], end='')
+            print("")
 
     def AttachRight(self,  otherMapData):
-        maxSize = max( len(self.m_mapData),  len(otherMapData.m_mapData))
+        maxSize = max(len(self.m_mapData[0]), len(otherMapData[0]))
+        
+        # 세로 크기가 다르다면, 맞춰 준다.
+        self.ExtendDown(maxSize - len(self.m_mapData[0]))
+        otherMapData.ExtendDown(maxSize - len(otherMapData[0]))
 
-        # 2개의 Row 데이터를 같게 만들어 준다.
-        for i in range( maxSize - len(self.m_mapData) ):
-            self.m_mapData.append( [0 for i in range(len(self.m_mapData[0]) ) ] )
+        # 맞춰진 데이터는 self를 기준으로 합친다.
+        # 먼저, self를 오른쪽의 데이터 크기 만큼 오른쪽으로 확장 한다.
+        startPosition = self.m_rightSize + 1
+        self.ExtendRight(len(otherMapData.m_mapData))
 
-        for i in range( maxSize - len(otherMapData.m_mapData) ):
-            otherMapData.m_mapData.append( [0 for i in range(len(otherMapData.m_mapData[0]) ) ] )
+        # 이제 데이터를 하나하나 옮겨보자.
+        otherXList = list(range(otherMapData.m_leftSize, otherMapData.m_rightSize + 1))
+        selfXList = list(range(self.m_leftSize, self.m_rightSize + 1))
+        
+        for i in range(len(otherXList)):
+            otherYList = list(range(otherMapData.m_upSize, otherMapData.m_downSize - 1, -1))
+            selfYList = list(range(self.m_upSize, self.m_downSize -1, -1))
 
-        # otherMapData 를 오른쪽에 붙인다.
-        for i in range(maxSize):
-            self.m_mapData[i].extend(otherMapData.m_mapData[i])
+            for j in range(len(selfYList)):
+                self.m_mapData[startPosition][selfYList[j]] = otherMapData.m_mapData[otherXList[i]][otherYList[j]]
+            
+            startPosition = startPosition + 1
 
     def AttachLeft(self,  otherMapData):
-        maxSize = max( len(self.m_mapData),  len(otherMapData.m_mapData))
+        maxSize = max(len(self.m_mapData[0]), len(otherMapData[0]))
         
-        # 2개의 Row 데이터를 같게 만들어 준다.
-        for i in range( maxSize - len(self.m_mapData) ):
-            self.m_mapData.append( [0 for i in range(len(self.m_mapData[0]) ) ] )
+        # 세로 크기가 다르다면, 맞춰 준다.
+        self.ExtendDown(maxSize - len(self.m_mapData[0]))
+        otherMapData.ExtendDown(maxSize - len(otherMapData[0]))
+
+        # 맞춰진 데이터는 self를 기준으로 합친다.
+        # 먼저, self를 오른쪽의 데이터 크기 만큼 오른쪽으로 확장 한다.
+        self.ExtendLeft(len(otherMapData.m_mapData))
+        startPosition = self.m_leftSize
+
+        # 이제 데이터를 하나하나 옮겨보자.
+        otherXList = list(range(otherMapData.m_leftSize, otherMapData.m_rightSize + 1))
+        selfXList = list(range(self.m_leftSize, self.m_rightSize + 1))
         
-        for i in range( maxSize - len(otherMapData.m_mapData) ):
-            otherMapData.m_mapData.append( [0 for i in range(len(otherMapData.m_mapData[0]) ) ] )
+        for i in range(len(otherXList)):
+            otherYList = list(range(otherMapData.m_upSize, otherMapData.m_downSize - 1, -1))
+            selfYList = list(range(self.m_upSize, self.m_downSize -1, -1))
+
+            for j in range(len(selfYList)):
+                self.m_mapData[startPosition][selfYList[j]] = otherMapData.m_mapData[otherXList[i]][otherYList[j]]
             
-        # otherMapData 를 오른쪽에 붙인다.
-        for i in range(maxSize):
-            temp = otherMapData.m_mapData[i]
-            temp.extend(self.m_mapData[i])
-            self.m_mapData[i] = temp
+            startPosition = startPosition + 1
         
     def AttachTop(self,  otherMapData):
-        pass
+        maxSize = max(len(self.m_mapData), len(otherMapData.m_mapData))
         
-    def AttachBottom(self,  otherMapData):
-        maxSize = max( len(self.m_mapData),  len(otherMapData.m_mapData))
+        # 가로 크기가 다르다면, 맞춰 준다.
+        self.ExtendRight(maxSize - len(self.m_mapData))
+        otherMapData.ExtendRight(maxSize - len(otherMapData.m_mapData))
 
-        # 2개의 Row 데이터를 같게 만들어 준다.
-        for i in range( maxSize - len(self.m_mapData) ):
-            self.m_mapData.append( [0 for i in range(len(self.m_mapData[0]) ) ] )
+        # 맞춰진 데이터는 self를 기준으로 합친다.
+        # 먼저, self를 위쪽의 데이터 크기 만큼 위쪽으로 확장 한다.
+        startPosition = self.m_upSize + 1
+        self.ExtendUp(len(otherMapData.m_mapData[0]))
 
-        for i in range( maxSize - len(otherMapData.m_mapData) ):
-            otherMapData.m_mapData.append( [0 for i in range(len(otherMapData.m_mapData[0]) ) ] )
+        # 이제 데이터를 하나하나 옮겨보자.
+        otherXList = list(range(otherMapData.m_leftSize, otherMapData.m_rightSize + 1))
+        selfXList = list(range(self.m_leftSize, self.m_rightSize + 1))
+        
+        for i in range(len(otherXList)):
+            otherYList = list(range(otherMapData.m_upSize, otherMapData.m_downSize - 1, -1))
+            selfYList = list(range(self.m_upSize, self.m_downSize -1, -1))
 
-        # otherMapData 를 오른쪽에 붙인다.
-        for i in range(maxSize):
-            self.m_mapData[i].extend(otherMapData.m_mapData[i])
+            for j in range(len(otherYList)):
+                self.m_mapData[selfXList[i]][selfYList[j]] = otherMapData.m_mapData[otherXList[i]][otherYList[j]]
+        
+    def AttachBottom(self, otherMapData):
+        maxSize = max(len(self.m_mapData), len(otherMapData.m_mapData))
+        
+        # 가로 크기가 다르다면, 맞춰 준다.
+        self.ExtendRight(maxSize - len(self.m_mapData))
+        otherMapData.ExtendRight(maxSize - len(otherMapData.m_mapData))
+
+        # 맞춰진 데이터는 self를 기준으로 합친다.
+        # 먼저, self를 아래쪽의 데이터 크기 만큼 위쪽으로 확장 한다.
+        startPosition = self.m_downSize - 1
+        self.ExtendDown(len(otherMapData.m_mapData[0]))
+
+        # 이제 데이터를 하나하나 옮겨보자.
+        otherXList = list(range(otherMapData.m_leftSize, otherMapData.m_rightSize + 1))
+        selfXList = list(range(self.m_leftSize, self.m_rightSize + 1))
+        
+        for i in range(len(otherXList)):
+            otherYList = list(range(otherMapData.m_upSize, otherMapData.m_downSize - 1, -1))
+            selfYList = list(range(self.m_upSize, self.m_downSize -1, -1))
+
+            for j in range(len(otherYList)):
+                self.m_mapData[selfXList[i]][startPosition + selfYList[j]] = otherMapData.m_mapData[otherXList[i]][otherYList[j]]
         
     def ExtendToSize(self,  x,  y):
         self.ExtendRight(x)
+        self.ExtendUp(y)
+
+    def ExtendToReverseSize(self,  x,  y):
+        self.ExtendLeft(x)
         self.ExtendDown(y)
-        
+
     def FillAllData(self,  value):
-        for data in self.m_mapData:
-            for i in range(len(data)):
-                data[i] = value
+        for key in self.m_mapData:
+            for data in self.m_mapData[key]:
+                self.m_mapData[key][data] = value
 
     def ExtendUp(self,  val = 1):
         for i in range(val):
-            self.m_mapData.insert(0,  [0 for i in range(len(self.m_mapData[0]))])
-            self.m_row = self.m_row + 1
-        
+            #for colData in self.m_mapData:
+                #colData.append(0)
+                
+            for key in self.m_mapData:
+                self.m_mapData[key][self.m_upSize + 1] = 0
+                
+            self.m_upSize = self.m_upSize + 1
+    
     def ExtendDown(self, val = 1):
         for i in range(val):
-            self.m_mapData.append([0 for i in range(len(self.m_mapData[0]))])
-            self.m_row = self.m_row + 1
+            #for colData in self.m_mapData:
+                #colData.insert(0, 0)
+                
+            for key in self.m_mapData:
+                self.m_mapData[key][self.m_downSize - 1] = 0
+
+            self.m_downSize = self.m_downSize - 1
         
     def ExtendLeft(self, val = 1):
         for i in range(val):
-            for colData in self.m_mapData:
-                colData.insert(0, 0)
-
-            self.m_col = self.m_col + 1
+            #self.m_mapData.append([0 for i in range(len(self.m_mapData[0]))])
+            #self.m_row = self.m_row + 1
+            self.m_mapData[self.m_leftSize - 1 ] = dict(self.m_mapData[self.m_leftSize])
+            
+            for key in self.m_mapData[self.m_leftSize - 1]:
+                self.m_mapData[self.m_leftSize - 1][key] = 0
+                
+            self.m_leftSize = self.m_leftSize - 1
     
     def ExtendRight(self,  val = 1):
         for i in range(val):
-            for colData in self.m_mapData:
-                colData.append(0)
-
-            self.m_col = self.m_col + 1
+            #self.m_mapData.insert(0,  [0 for i in range(len(self.m_mapData[0]))])
+            #self.m_row = self.m_row + 1
+            self.m_mapData[self.m_rightSize + 1 ] = dict(self.m_mapData[self.m_rightSize])
+            
+            for key in self.m_mapData[self.m_rightSize + 1]:
+                self.m_mapData[self.m_rightSize + 1][key] = 0
+                
+            self.m_rightSize = self.m_rightSize + 1
 
 class Room(Graph):
     def __init__(self):
@@ -183,7 +279,9 @@ def MapGenerator(maxRoomNum):
     selectedRoom.SetPosition(0,  0)
     selectedRoom.GenerateRandomRoomData()
     
-    visitedRoom = { 0 : { 0 : True } }
+    #visitedRoom = { 0 : { 0 : True } }
+    visitedRoom = MapData()
+    visitedRoom[0][0] = True
     while len(generatedRoom) > 0:
         otherRoom = generatedRoom.pop()
         
@@ -224,22 +322,26 @@ def MapGenerator(maxRoomNum):
                 elif dir == 6:
                     x = x - 1
                     y = y + 1
-                    
-                xList = visitedRoom.get(x)
-                if xList is not None:
-                    yList = xList.get(y)
-                    
-                    if yList is not None:
-                        if visitedRoom[x][y] == True:
-                            continue
-                    else:
-                        yList = {y : True }
-                else:
-                    xList = {x : { y : True } }
+
+                if visitedRoom.m_rightSize < x:
+                    visitedRoom.ExtendRight()
+
+                if visitedRoom.m_leftSize > x:
+                    visitedRoom.ExtendLeft()
+
+                if visitedRoom.m_upSize < y:
+                    visitedRoom.ExtendUp()
+
+                if visitedRoom.m_downSize > y:
+                    visitedRoom.ExtendDown()
+
+                if visitedRoom[x][y] == True:
+                    continue
 
                 # 서로를 연결 한다.
                 selectedRoom.m_directionData[dir] = otherRoom
                 otherRoom.m_directionData[prevDirection] = selectedRoom
+                visitedRoom[x][y] = True
 
                 # 다른 방의 위치를 설정한다.
                 otherRoom.SetPosition(x,  y)
@@ -253,9 +355,50 @@ def MapGenerator(maxRoomNum):
         selectedRoom = otherRoom
     
     finishWorkedRoom.append(selectedRoom)
-    finishWorkedRoom.append(endRoom)
     
     # 이제 공식적으로 맵은 완성.
     # 이제 잔잔한 방들을 추가하여 좀 더 보기 좋게 꾸미자.
 
     return finishWorkedRoom
+
+# GenerateRandomRoom(size)
+def GenerateRandomRoom(roomSize):
+    madedRoom = MapGenerator(roomSize)
+    tempMapData = MapData()
+
+    for room in madedRoom:
+        if tempMapData.m_rightSize < room.m_posX:
+            tempMapData.ExtendRight()
+
+        if tempMapData.m_leftSize > room.m_posX:
+            tempMapData.ExtendLeft()
+
+        if tempMapData.m_upSize < room.m_posY:
+            tempMapData.ExtendUp()
+
+        if tempMapData.m_downSize > room.m_posY:
+            tempMapData.ExtendDown()
+            
+        tempMapData[room.m_posX][room.m_posY] = room
+
+    finalResult = MapData()
+    
+    for y in range(tempMapData.m_upSize, tempMapData.m_downSize - 1, -1):
+        xResult = MapData()
+        isFirstMeet = False
+        
+        for x in range(tempMapData.m_leftSize, tempMapData.m_rightSize + 1):
+            if isinstance(tempMapData[x][y], EightDirectionRoom):
+                if isFirstMeet == False:
+                    xResult = tempMapData[x][y].m_mapData
+                    isFirstMeet = True
+                    continue
+                
+                if x < 0:
+                    xResult.AttachLeft(tempMapData[x][y].m_mapData)
+                else:
+                    xResult.AttachRight(tempMapData[x][y].m_mapData)
+                    
+        finalResult.AttachBottom(xResult)
+                
+    return finalResult
