@@ -30,9 +30,6 @@ class MapData:
         return self.m_mapData[index]
 
     def PrintMap(self):
-        x = self.m_leftSize
-        y = self.m_upSize
-
         for j in range(self.m_upSize, self.m_downSize - 1, -1):
             for i in range(self.m_leftSize, self.m_rightSize + 1):
                 print(self.m_mapData[i][j], end='')
@@ -142,6 +139,16 @@ class MapData:
         self.ExtendLeft(x)
         self.ExtendDown(y)
 
+    def FillAllCorner(self,  value):
+        for i in range(self.m_leftSize, self.m_rightSize + 1):
+            self.m_mapData[i][self.m_upSize] = value
+            self.m_mapData[i][self.m_downSize] = value
+                
+        for j in range(self.m_upSize, self.m_downSize - 1, -1):
+            self.m_mapData[self.m_leftSize][j] = value
+            self.m_mapData[self.m_rightSize][j] = value
+            
+
     def FillAllData(self,  value):
         for key in self.m_mapData:
             for data in self.m_mapData[key]:
@@ -239,7 +246,7 @@ class EightDirectionRoom:
         
         self.m_mapData = MapData()
         self.m_mapData.ExtendToSize(self.m_roomSizeX,  self.m_roomSizeY)
-        self.m_mapData.FillAllData(1)
+        self.m_mapData.FillAllCorner(1)
     
     def SetPosition(self,  x,  y):
         self.m_posX = x
