@@ -1,4 +1,3 @@
-from data import *
 from utils import *
 
 from random import *
@@ -126,10 +125,10 @@ class MapData:
         
         for i in range(len(otherXList)):
             otherYList = list(range(otherMapData.m_upSize, otherMapData.m_downSize - 1, -1))
-            selfYList = list(range(self.m_upSize, self.m_downSize -1, -1))
+            selfYList = list(range(startPosition, self.m_downSize -1, -1))
 
             for j in range(len(otherYList)):
-                self.m_mapData[selfXList[i]][startPosition + selfYList[j]] = otherMapData.m_mapData[otherXList[i]][otherYList[j]]
+                self.m_mapData[selfXList[i]][selfYList[j]] = otherMapData.m_mapData[otherXList[i]][otherYList[j]]
         
     def ExtendToSize(self,  x,  y):
         self.ExtendRight(x)
@@ -147,7 +146,6 @@ class MapData:
         for j in range(self.m_upSize, self.m_downSize - 1, -1):
             self.m_mapData[self.m_leftSize][j] = value
             self.m_mapData[self.m_rightSize][j] = value
-            
 
     def FillAllData(self,  value):
         for key in self.m_mapData:
@@ -346,8 +344,9 @@ def MapGenerator(maxRoomNum):
                     continue
 
                 # 서로를 연결 한다.
-                selectedRoom.m_directionData[dir] = otherRoom
-                otherRoom.m_directionData[prevDirection] = selectedRoom
+                weightValue = randint(1,  10)
+                selectedRoom.m_directionData[dir] = [otherRoom,  Edge(weightValue)]
+                otherRoom.m_directionData[prevDirection] = [selectedRoom,  Edge(weightValue)]
                 visitedRoom[x][y] = True
 
                 # 다른 방의 위치를 설정한다.
@@ -390,6 +389,53 @@ def GenerateRandomRoom(roomSize):
 
     finalResult = MapData()
     
+    def AddEdge(data,  result):
+        tempEdge = MapData()
+        
+        if data.m_directionData[0] != None:
+            tempEdge.ExtendUp(data.m_directionData[0][1].m_weight - 1)
+            
+            result.AttachTop(tempEdge)
+            
+        if data.m_directionData[1] != None:
+            tempEdge.ExtendUp(data.m_directionData[1][1].m_weight - 1)
+            tempEdge.ExtendRight(data.m_directionData[1][1].m_weight - 1)
+            
+            result.AttachRight(tempEdge)
+            
+        if data.m_directionData[2] != None:
+            tempEdge.ExtendRight(data.m_directionData[2][1].m_weight - 1)
+            
+            result.AttachRight(tempEdge)
+            
+        if data.m_directionData[3] != None:
+            tempEdge.ExtendRight(data.m_directionData[3][1].m_weight - 1)
+            tempEdge.ExtendDown(data.m_directionData[3][1].m_weight - 1)
+            
+            result.AttachRight(tempEdge)
+            
+        if data.m_directionData[4] != None:
+            tempEdge.ExtendDown(data.m_directionData[4][1].m_weight - 1)
+            
+            result.AttachBottom(tempEdge)
+            
+        if data.m_directionData[5] != None:
+            tempEdge.ExtendDown(data.m_directionData[5][1].m_weight - 1)
+            tempEdge.ExtendLeft(data.m_directionData[5][1].m_weight - 1)
+            
+            result.AttachLeft(tempEdge)
+            
+        if data.m_directionData[6] != None:
+            tempEdge.ExtendRight(data.m_directionData[6][1].m_weight - 1)
+
+            result.AttachLeft(tempEdge)
+            
+        if data.m_directionData[7] != None:
+            tempEdge.ExtendRight(data.m_directionData[7][1].m_weight - 1)
+            tempEdge.ExtendUp(data.m_directionData[7][1].m_weight - 1)
+
+            result.AttachLeft(tempEdge)
+    
     for y in range(tempMapData.m_upSize, tempMapData.m_downSize - 1, -1):
         xResult = MapData()
         isFirstMeet = False
@@ -398,14 +444,19 @@ def GenerateRandomRoom(roomSize):
             if isinstance(tempMapData[x][y], EightDirectionRoom):
                 if isFirstMeet == False:
                     xResult = tempMapData[x][y].m_mapData
+                    
+                    AddEdge(tempMapData[x][y],  xResult)
+
                     isFirstMeet = True
                     continue
+                    
+                AddEdge(tempMapData[x][y],  xResult)
                 
                 if x < 0:
                     xResult.AttachLeft(tempMapData[x][y].m_mapData)
                 else:
                     xResult.AttachRight(tempMapData[x][y].m_mapData)
-                    
+
         finalResult.AttachBottom(xResult)
                 
     return finalResult

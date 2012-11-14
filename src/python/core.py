@@ -259,10 +259,10 @@ class Edge:
     
     m_weight = 1
 
-    def __init__(self):
+    def __init__(self,  weight = 1):
         self.m_source = -1
         self.m_destiny = -1
-        self.m_weight = 1
+        self.m_weight = weight
 
 class Graph:
     """ 그래프 클레스, 가중치가 없는 기본적인 노드와 엣지 리스트를 가진다. """
