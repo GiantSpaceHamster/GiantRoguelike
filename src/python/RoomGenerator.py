@@ -1,5 +1,4 @@
 from utils import *
-
 from random import *
 
 class MapData:
@@ -21,12 +20,24 @@ class MapData:
         self.m_downSize = 0
         self.m_leftSize = 0
         self.m_rightSize = 0
+        
+    def GetWidth(self):
+        return (-self.m_leftSize + self.m_rightSize)
+        
+    def GetHeight(self):
+        return (-self.m_downSize + self.m_upSize)
 
     def __call__(self):
         print("Data : ",  self.m_mapData)
         
     def __getitem__(self,  index):
         return self.m_mapData[index]
+
+    def GetData(self, x, y):
+        refX = x + self.m_leftSize
+        refY = y + self.m_downSize
+        
+        return self.m_mapData[refX][refY]
 
     def PrintMap(self):
         for j in range(self.m_upSize, self.m_downSize - 1, -1):
@@ -194,17 +205,11 @@ class MapData:
                 
             self.m_rightSize = self.m_rightSize + 1
 
-class Room(Graph):
-    def __init__(self):
-        super().__init__()
-
 class EightDirectionRoom:
     m_identifier = -1
     
     m_posX = -1
     m_posY = -1
-
-    m_roomData = None
     
     m_mapData = None
     m_roomSizeX = -1
@@ -230,7 +235,6 @@ class EightDirectionRoom:
     
     def __init__(self,  ident):
         self.m_identifier = ident
-        self.m_roomData = Room()
         self.m_directionData = [None for i in range(8)]
         
         self.m_mapData = None
@@ -262,7 +266,10 @@ def MapGenerator(maxRoomNum):
     finishWorkedRoom = []
 
     # TODO: 설정에 따라 방의 갯수는 달라진다. 이를 수정해야 함.
+    # 방 갯수가 1 일때는 고정 한다.
     totalRoomNum = randint(int(maxRoomNum * 0.5),  maxRoomNum)
+    if maxRoomNum == 1:
+        totalRoomNum = 1
     
     generatedRoom = [EightDirectionRoom(i) for i in range(totalRoomNum)]
     
@@ -367,8 +374,7 @@ def MapGenerator(maxRoomNum):
 
     return finishWorkedRoom
 
-# GenerateRandomRoom(size)
-def GenerateRandomRoom(roomSize):
+def CreateRandomRoom(roomSize):
     madedRoom = MapGenerator(roomSize)
     tempMapData = MapData()
 

@@ -50,7 +50,11 @@ fieldMap = [
 row = 10
 col = 10
 
-fieldMap = GenerateMap(row, col)
+#fieldMap = GenerateMap(row, col)
+fieldMap = RandomGenerateMap(0, 5)
+
+row = fieldMap.GetWidth()
+col = fieldMap.GetHeight()
 
 orderList = { "Move" : MoveCharacter }
 

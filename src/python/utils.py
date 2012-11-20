@@ -5,6 +5,7 @@
 from core import *
 from resource import *
 from definition import *
+from RoomGenerator import *
 
 import os
 
@@ -99,58 +100,80 @@ class ResourceManager(SingletonPattern):
 
         return None
 
+# 랜덤 맵 -> 일반 맵 변환 함수
+def TransRandomMapToGraphMap(randomMap):
+    width = randomMap.GetWidth()
+    height = randomMap.GetHeight()
+    
+    print(width, height)
+    mapData = RogueMapList()
+    mapData.GenData(width, height)
+    
+    for i in range(width):
+        for j in range(height):
+            """데이터를 옮긴다!"""
+            if randomMap.GetData(i, j) == 1:
+                mapData[0][i][j] = Wall()
+                mapData[0][i][j].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
+                
+    # 모든 작업이 끝났다면, 그래프를 새로 만들자.
+    
+    return mapData
 
 # 맵 생성 함수
-def GenerateMap(x, y):
-    """ x, y 로 구성된 맵을 생성 합니다. """
-
-    # Path Finding을 위해, x * y 크기의 노드를 만듭니다.
-    mapNode = CreateNodeList(x * y)
-
-    # 만들어진 mapNode 데이터를 토대로, 4방향 격자 그래프를 만듭니다.
-    mapGraph = CreateQuadGridGraph(x, y, mapNode)
-
-    # 맵 데이터를 생성 합니다.
-    mapData = []
-
-    mapData.append(list(range(x)))
-    mapData.append(list(range(x)))
-    mapData.append(list(range(x)))
-    mapData.append(mapGraph)
-
-    for i in range(x):
-        mapData[0][i] = list(range(y))
-        mapData[1][i] = list(range(y))
-        mapData[2][i] = list(range(y))
+def RandomGenerateMap(roomType, roomCount):
+    """ 랜덤으로 맵을 만들어서 설정 합니다. """
+    # TODO : roomType을 사용할 수 있게 수정해야 합니다.
+    createdRoom = CreateRandomRoom(roomCount)
+    
+    # 만들어진 맵을 기초로, 맵으로 변환 합니다.
+    createdMap = TransRandomMapToGraphMap(createdRoom)
+    
+    return createdMap
+    
+class RogueMapList:
+    m_mapData = []
+    m_width = 0
+    m_height = 0
+    
+    def __init__(self):
+        self.m_mapData = []
+        self.m_width = 0
+        self.m_height = 0
         
-        for j in range(y):
-            mapData[0][i][j] = Object()
-            mapData[1][i][j] = Object()
-            mapData[2][i][j] = Board()
-
-    """
-    외곽에 벽을 설치한다.
-    """
-
-    for i in range(x):
-        mapData[0][i][0] = Wall()
-        mapData[0][i][y - 1] = Wall()
+    def GetWidth(self):
+        return self.m_width
         
-        mapData[0][i][0].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
-        mapData[0][i][y - 1].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
-
-    for i in range(y):
-        mapData[0][0][i] = Wall()
-        mapData[0][x - 1][i] = Wall()
+    def GetHeight(self):
+        return self.m_height
         
-        mapData[0][0][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
-        mapData[0][x - 1][i].SetProperty("ResourceID", "Image/BlockObject/Wall/BreakdisableWall")
+    def GenData(self, x, y):
+        self.m_width = x
+        self.m_height = y
+        
+        # Path Finding을 위해, x * y 크기의 노드를 만듭니다.
+        mapNode = CreateNodeList(x * y)
 
-    """
-    TODO: 위 벽들을 기준으로, 각 그래프의 리스트들의 Edge도 재 조정해야 한다.
-    """
+        # 만들어진 mapNode 데이터를 토대로, 4방향 격자 그래프를 만듭니다.
+        mapGraph = CreateQuadGridGraph(x, y, mapNode)
+        
+        self.m_mapData.append(list(range(x)))
+        self.m_mapData.append(list(range(x)))
+        self.m_mapData.append(list(range(x)))
+        self.m_mapData.append(mapGraph)
 
-    return mapData
+        for i in range(x):
+            self.m_mapData[0][i] = list(range(y))
+            self.m_mapData[1][i] = list(range(y))
+            self.m_mapData[2][i] = list(range(y))
+        
+            for j in range(y):
+                self.m_mapData[0][i][j] = Object()
+                self.m_mapData[1][i][j] = Object()
+                self.m_mapData[2][i][j] = Board()
+                
+    def __getitem__(self, key):
+        return self.m_mapData[key]
 
 # 맵 검사 함수
 def CheckValidMap(mapData, x, y, r, w):
@@ -210,37 +233,43 @@ def CreateQuadGridGraph(width, height, nodeData):
         for j in range(height):
             for count in range(4):
                 edge = Edge()
-                edge.m_source = i * width + j
+                edge.m_source = j * width + i
 
                 # 왼쪽
                 if count == 0:
                     if i > 0:
-                        edge.m_destiny = (i - 1) * width + j
+                        edge.m_destiny = (j - 1) * width + i
                     else:
                         continue
                 
                 # 위
                 if count == 1:
                     if j > 0:
-                        edge.m_destiny = i * width + j - 1
+                        edge.m_destiny = j * width + i - 1
                     else:
                         continue
                 
                 # 오른쪽
                 if count == 2:
                     if i < width - 1:
-                        edge.m_destiny = (i + 1) * width + j
+                        edge.m_destiny = (j + 1) * width + i
                     else:
                         continue
                     
                 # 아래
                 if count == 3:
                     if j < height - 1:
-                        edge.m_destiny = i * width + j + 1
+                        edge.m_destiny = j * width + i + 1
                     else:
                         continue
+                        
+                if edge.m_destiny < 0:
+                    edge.m_destiny = -1
 
-                graphList[i * width + j].AddEdge(edge)
+                if edge.m_destiny >= len(nodeData):
+                    edge.m_destiny = -1
+
+                graphList[j * width + i].AddEdge(edge)
 
     return graphList
 
@@ -335,4 +364,4 @@ def PathFindForBFS(src, dst, graph):
 
 # BFS로 패스를 찾고, 해당 패스로 이동 명령을 내리는 함수
 def PathFindAndMove(obj, mapData, x, y):
-    return PathFindForBFS(obj.GetY() * 10 + obj.GetX(), y * 10 + x, mapData[3])
+    return PathFindForBFS(obj.GetY() * mapData.GetWidth() + obj.GetX(), y * mapData.GetHeight() + x, mapData[3])
